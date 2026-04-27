@@ -1,0 +1,1283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ATLASWAY TRADING LIMITED — Global Physical Trading</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,300;9..144,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: {
+              900: '#06101F',
+              800: '#0A1628',
+              700: '#0F1D34',
+              600: '#152844',
+              500: '#1F3556',
+            },
+            paper: {
+              50: '#F8F6F1',
+              100: '#F2EFE8',
+              200: '#E8E4DA',
+              300: '#D6D1C4',
+            },
+            gold: {
+              300: '#E0C589',
+              400: '#D2B36F',
+              500: '#C9A961',
+              600: '#A98843',
+              700: '#83682E',
+            },
+            slate2: {
+              400: '#7B8AA1',
+              500: '#5C6B82',
+              600: '#3F4D63',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+            mono: ['JetBrains Mono', 'ui-monospace'],
+            display: ['Fraunces', 'Inter', 'serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; background: #F8F6F1; color: #0A1628; }
+    .grain {
+      background-image: radial-gradient(rgba(10,22,40,0.025) 1px, transparent 1px);
+      background-size: 3px 3px;
+    }
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 1s cubic-bezier(.2,.6,.2,1), transform 1s cubic-bezier(.2,.6,.2,1); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: .08s; }
+    .reveal-delay-2 { transition-delay: .16s; }
+    .reveal-delay-3 { transition-delay: .24s; }
+    .reveal-delay-4 { transition-delay: .32s; }
+    .hairline { background: linear-gradient(90deg, transparent, rgba(10,22,40,0.18), transparent); }
+    .hairline-light { background: linear-gradient(90deg, transparent, rgba(245,243,238,0.25), transparent); }
+    .num-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; }
+    .display { font-family: 'Fraunces', serif; font-weight: 300; letter-spacing: -0.02em; line-height: 1.02; }
+    .marquee {
+      animation: marquee 60s linear infinite;
+    }
+    @keyframes marquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .route-dash {
+      stroke-dasharray: 4 6;
+      animation: dash 30s linear infinite;
+    }
+    @keyframes dash { to { stroke-dashoffset: -200; } }
+    .pulse-dot {
+      animation: pulse-dot 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: .35; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.4); }
+    }
+    .ticker-row { mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); }
+    .gold-underline { position: relative; }
+    .gold-underline::after {
+      content: ''; position: absolute; left: 0; bottom: -4px; width: 28px; height: 2px; background: #C9A961;
+    }
+    /* selection */
+    ::selection { background: #C9A961; color: #0A1628; }
+    /* form */
+    input, textarea {
+      background: transparent !important;
+      border: 0 !important;
+      border-bottom: 1px solid rgba(10,22,40,0.18) !important;
+      border-radius: 0 !important;
+      padding: 14px 0 !important;
+      box-shadow: none !important;
+      font-size: 15px !important;
+      color: #0A1628 !important;
+      transition: border-color .3s ease;
+    }
+    input:focus, textarea:focus {
+      outline: none !important;
+      border-bottom-color: #C9A961 !important;
+    }
+    input::placeholder, textarea::placeholder { color: rgba(10,22,40,0.4) !important; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: #0A1628; color: #F8F6F1;
+      padding: 14px 22px; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase;
+      transition: background .25s ease, transform .25s ease;
+      border: 1px solid #0A1628;
+    }
+    .btn-primary:hover { background: #C9A961; border-color: #C9A961; color: #0A1628; }
+    .btn-primary .arr { transition: transform .3s ease; }
+    .btn-primary:hover .arr { transform: translateX(4px); }
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 10px;
+      color: inherit; padding: 12px 0; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+      border-bottom: 1px solid currentColor;
+      transition: gap .25s ease, color .25s ease;
+    }
+    .btn-ghost:hover { gap: 16px; color: #C9A961; }
+    .nav-link { position: relative; }
+    .nav-link::after {
+      content:''; position:absolute; left:0; bottom:-4px; width:0; height:1px; background:#C9A961; transition: width .3s ease;
+    }
+    .nav-link:hover::after { width: 100%; }
+    .card-hover { transition: transform .5s cubic-bezier(.2,.6,.2,1), border-color .5s ease, background .5s ease; }
+    .card-hover:hover { transform: translateY(-3px); }
+    .scroll-indicator {
+      animation: scrolldown 2.4s cubic-bezier(.6,.05,.4,1) infinite;
+    }
+    @keyframes scrolldown {
+      0% { transform: translateY(0); opacity: 0; }
+      30% { opacity: 1; }
+      100% { transform: translateY(28px); opacity: 0; }
+    }
+    .market-tag {
+      transition: background .25s ease, color .25s ease, border-color .25s ease;
+    }
+    .market-tag:hover {
+      background: #0A1628; color: #F8F6F1; border-color: #0A1628;
+    }
+    .market-tag .dot { transition: background .25s ease; }
+    .market-tag:hover .dot { background: #C9A961; }
+    /* image plate effect */
+    .plate {
+      filter: contrast(1.05) saturate(0.85);
+    }
+    /* custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #F2EFE8; }
+    ::-webkit-scrollbar-thumb { background: #C9A961; border-radius: 0; }
+    ::-webkit-scrollbar-thumb:hover { background: #A98843; }
+    * { scrollbar-width: thin; scrollbar-color: #C9A961 #F2EFE8; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- React + Babel pinned -->
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" data-presets="react">
+// Custom monochrome SVG illustrations toned to the brand palette.
+// Three plates: PortGrain, ContainerStack, OilField — flat editorial style,
+// navy + gold + paper. Drawn from scratch (no stock photos).
+
+const PortGrain = ({ className = "" }) => (
+  <svg viewBox="0 0 800 520" className={className} preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="pg-sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#152844"/>
+        <stop offset="55%" stopColor="#1F3556"/>
+        <stop offset="100%" stopColor="#3a4a66"/>
+      </linearGradient>
+      <linearGradient id="pg-water" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#0F1D34"/>
+        <stop offset="100%" stopColor="#06101F"/>
+      </linearGradient>
+      <linearGradient id="pg-grain" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#E0C589"/>
+        <stop offset="100%" stopColor="#A98843"/>
+      </linearGradient>
+      <pattern id="pg-noise" width="3" height="3" patternUnits="userSpaceOnUse">
+        <circle cx="1" cy="1" r="0.5" fill="#06101F" opacity="0.08"/>
+      </pattern>
+    </defs>
+    {/* sky */}
+    <rect width="800" height="320" fill="url(#pg-sky)"/>
+    {/* faint horizon clouds */}
+    <path d="M0,180 Q150,160 300,175 T600,170 T800,178 L800,200 L0,200 Z" fill="#F8F6F1" opacity="0.04"/>
+    <path d="M0,140 Q200,125 400,138 T800,135 L800,155 L0,155 Z" fill="#F8F6F1" opacity="0.03"/>
+    {/* distant skyline */}
+    <g opacity="0.45" fill="#06101F">
+      <rect x="40" y="245" width="2" height="40"/>
+      <rect x="45" y="260" width="20" height="25"/>
+      <rect x="70" y="250" width="3" height="35"/>
+      <rect x="78" y="265" width="40" height="20"/>
+      <rect x="125" y="240" width="2" height="45"/>
+      <polygon points="130,255 140,240 150,255 150,285 130,285"/>
+      <rect x="160" y="258" width="60" height="27"/>
+      <rect x="225" y="250" width="2" height="35"/>
+      <rect x="230" y="262" width="50" height="23"/>
+      <rect x="285" y="245" width="3" height="40"/>
+      <rect x="295" y="260" width="35" height="25"/>
+      <rect x="335" y="255" width="80" height="30"/>
+      <rect x="420" y="248" width="2" height="37"/>
+      <rect x="425" y="258" width="55" height="27"/>
+      <rect x="485" y="252" width="40" height="33"/>
+      <rect x="530" y="248" width="2" height="37"/>
+      <rect x="538" y="262" width="60" height="23"/>
+      <rect x="605" y="255" width="45" height="30"/>
+      <rect x="655" y="250" width="2" height="35"/>
+      <rect x="662" y="262" width="50" height="23"/>
+      <rect x="720" y="258" width="60" height="27"/>
+    </g>
+    {/* water */}
+    <rect y="285" width="800" height="120" fill="url(#pg-water)"/>
+    <g stroke="#5C6B82" strokeWidth="0.6" opacity="0.35">
+      <path d="M0,310 Q100,308 200,310 T400,310 T600,310 T800,310" fill="none"/>
+      <path d="M0,328 Q120,326 240,328 T480,328 T720,328" fill="none"/>
+      <path d="M0,348 Q150,346 300,348 T600,348 T800,348" fill="none"/>
+      <path d="M0,372 Q100,370 200,372 T400,372 T600,372 T800,372" fill="none"/>
+    </g>
+    {/* ship hull */}
+    <g>
+      <path d="M120,335 L660,335 L640,378 L150,378 Z" fill="#06101F"/>
+      <rect x="120" y="328" width="540" height="8" fill="#83682E"/>
+      <rect x="130" y="338" width="520" height="3" fill="#C9A961" opacity="0.4"/>
+      {/* superstructure */}
+      <rect x="540" y="285" width="110" height="50" fill="#F2EFE8"/>
+      <rect x="540" y="285" width="110" height="6" fill="#C9A961"/>
+      <rect x="555" y="298" width="14" height="14" fill="#152844"/>
+      <rect x="575" y="298" width="14" height="14" fill="#152844"/>
+      <rect x="595" y="298" width="14" height="14" fill="#152844"/>
+      <rect x="615" y="298" width="14" height="14" fill="#152844"/>
+      <rect x="555" y="318" width="80" height="8" fill="#152844" opacity="0.6"/>
+      {/* deck */}
+      <rect x="160" y="320" width="370" height="15" fill="#1F3556"/>
+      <rect x="160" y="318" width="370" height="3" fill="#3F4D63"/>
+    </g>
+    {/* cranes — 3 of them */}
+    {[180, 290, 400].map((x, i) => (
+      <g key={i} stroke="#C9A961" strokeWidth="2" fill="none">
+        <line x1={x} y1="320" x2={x} y2="180"/>
+        <line x1={x-3} y1="180" x2={x-3} y2="320"/>
+        <line x1={x+3} y1="180" x2={x+3} y2="320"/>
+        <line x1={x-8} y1="200" x2={x+90} y2="170"/>
+        <line x1={x-8} y1="195" x2={x+90} y2="165"/>
+        <line x1={x-8} y1="200" x2={x+90} y2="165"/>
+        <line x1={x+85} y1="167" x2={x+85} y2="240"/>
+        <circle cx={x+85} cy="240" r="3" fill="#C9A961"/>
+        {/* lattice */}
+        <line x1={x-3} y1="200" x2={x+3} y2="220"/>
+        <line x1={x+3} y1="200" x2={x-3} y2="220"/>
+        <line x1={x-3} y1="240" x2={x+3} y2="260"/>
+        <line x1={x+3} y1="240" x2={x-3} y2="260"/>
+        <line x1={x-3} y1="280" x2={x+3} y2="300"/>
+        <line x1={x+3} y1="280" x2={x-3} y2="300"/>
+      </g>
+    ))}
+    {/* rear mast */}
+    <g stroke="#C9A961" strokeWidth="1.5" fill="none">
+      <line x1="600" y1="285" x2="600" y2="200"/>
+      <line x1="595" y1="240" x2="605" y2="240"/>
+      <line x1="595" y1="220" x2="605" y2="220"/>
+    </g>
+    {/* dock */}
+    <rect y="378" width="800" height="45" fill="#D6D1C4"/>
+    <rect y="378" width="800" height="2" fill="#83682E" opacity="0.5"/>
+    {/* containers on dock */}
+    <g>
+      <rect x="20" y="395" width="42" height="18" fill="#83682E"/>
+      <rect x="20" y="395" width="42" height="2" fill="#C9A961"/>
+      <rect x="65" y="395" width="42" height="18" fill="#1F3556"/>
+      <rect x="65" y="395" width="42" height="2" fill="#3F4D63"/>
+      <rect x="20" y="378" width="42" height="17" fill="#152844"/>
+      <rect x="65" y="378" width="42" height="17" fill="#83682E"/>
+      <rect x="113" y="395" width="55" height="18" fill="#3F4D63"/>
+      {/* trucks */}
+      <rect x="200" y="400" width="60" height="14" fill="#F2EFE8"/>
+      <rect x="200" y="395" width="20" height="19" fill="#1F3556"/>
+      <rect x="320" y="400" width="55" height="14" fill="#E0C589"/>
+      <rect x="320" y="395" width="18" height="19" fill="#1F3556"/>
+    </g>
+    {/* grain piles — golden hero element */}
+    <g>
+      <path d="M380,520 L520,395 L660,520 Z" fill="url(#pg-grain)"/>
+      <path d="M380,520 L520,395 L520,520 Z" fill="#83682E" opacity="0.4"/>
+      <path d="M540,520 L680,420 L800,520 Z" fill="url(#pg-grain)"/>
+      <path d="M540,520 L680,420 L680,520 Z" fill="#83682E" opacity="0.35"/>
+      <path d="M250,520 L380,440 L500,520 Z" fill="url(#pg-grain)" opacity="0.92"/>
+      <path d="M250,520 L380,440 L380,520 Z" fill="#83682E" opacity="0.4"/>
+      {/* texture lines */}
+      <path d="M380,520 L520,395" stroke="#83682E" strokeWidth="1" opacity="0.5" fill="none"/>
+      <path d="M540,520 L680,420" stroke="#83682E" strokeWidth="1" opacity="0.5" fill="none"/>
+      <path d="M250,520 L380,440" stroke="#83682E" strokeWidth="1" opacity="0.5" fill="none"/>
+    </g>
+    <rect width="800" height="520" fill="url(#pg-noise)"/>
+  </svg>
+);
+
+const ContainerStack = ({ className = "" }) => (
+  <svg viewBox="0 0 800 520" className={className} preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="cs-sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#0F1D34"/>
+        <stop offset="100%" stopColor="#3a4a66"/>
+      </linearGradient>
+      <pattern id="cs-noise" width="3" height="3" patternUnits="userSpaceOnUse">
+        <circle cx="1" cy="1" r="0.5" fill="#06101F" opacity="0.08"/>
+      </pattern>
+    </defs>
+    <rect width="800" height="520" fill="url(#cs-sky)"/>
+    {/* horizon glow */}
+    <ellipse cx="400" cy="380" rx="500" ry="80" fill="#C9A961" opacity="0.12"/>
+    {/* ground */}
+    <rect y="430" width="800" height="90" fill="#06101F"/>
+    <line x1="0" y1="430" x2="800" y2="430" stroke="#C9A961" strokeWidth="1" opacity="0.3"/>
+    {/* container stack — built procedurally */}
+    {(() => {
+      const palette = ['#83682E', '#1F3556', '#C9A961', '#152844', '#3F4D63', '#A98843'];
+      const rows = [];
+      // back row
+      const containers = [];
+      let key = 0;
+      for (let row = 0; row < 5; row++) {
+        for (let col = 0; col < 12; col++) {
+          const x = 40 + col * 60;
+          const y = 410 - row * 42;
+          const c = palette[(row * 3 + col * 7) % palette.length];
+          const opacity = 0.65 + (row * 0.06);
+          containers.push(
+            <g key={key++} opacity={opacity}>
+              <rect x={x} y={y} width="56" height="38" fill={c}/>
+              <rect x={x} y={y} width="56" height="2" fill="#06101F" opacity="0.5"/>
+              <rect x={x} y={y+36} width="56" height="2" fill="#06101F" opacity="0.5"/>
+              {/* ridges */}
+              {[...Array(8)].map((_, k) => (
+                <line key={k} x1={x+4+k*7} y1={y+4} x2={x+4+k*7} y2={y+34} stroke="#06101F" strokeOpacity="0.18" strokeWidth="1"/>
+              ))}
+              {/* door */}
+              <rect x={x+50} y={y+4} width="4" height="30" fill="#06101F" opacity="0.4"/>
+            </g>
+          );
+        }
+      }
+      return containers;
+    })()}
+    {/* foreground larger containers */}
+    {(() => {
+      const palette = ['#C9A961', '#152844', '#83682E', '#1F3556', '#A98843'];
+      const out = [];
+      let key = 100;
+      for (let row = 0; row < 4; row++) {
+        for (let col = 0; col < 7; col++) {
+          const x = 60 + col * 110;
+          const y = 420 - row * 70;
+          const c = palette[(row + col * 2) % palette.length];
+          out.push(
+            <g key={key++}>
+              <rect x={x} y={y} width="100" height="64" fill={c}/>
+              <rect x={x} y={y} width="100" height="3" fill="#06101F" opacity="0.55"/>
+              <rect x={x} y={y+61} width="100" height="3" fill="#06101F" opacity="0.55"/>
+              {[...Array(14)].map((_, k) => (
+                <line key={k} x1={x+5+k*7} y1={y+5} x2={x+5+k*7} y2={y+59} stroke="#06101F" strokeOpacity="0.22" strokeWidth="1"/>
+              ))}
+              <rect x={x+90} y={y+5} width="6" height="54" fill="#06101F" opacity="0.5"/>
+              <rect x={x+85} y={y+30} width="3" height="3" fill="#F8F6F1" opacity="0.4"/>
+            </g>
+          );
+        }
+      }
+      return out;
+    })()}
+    {/* reach stacker silhouette */}
+    <g fill="#06101F" opacity="0.85">
+      <rect x="610" y="370" width="80" height="40"/>
+      <rect x="600" y="385" width="100" height="25"/>
+      <circle cx="620" cy="425" r="18"/>
+      <circle cx="680" cy="425" r="18"/>
+      <circle cx="620" cy="425" r="9" fill="#3F4D63"/>
+      <circle cx="680" cy="425" r="9" fill="#3F4D63"/>
+      {/* boom */}
+      <path d="M650,375 L750,260 L760,265 L660,380 Z"/>
+      <path d="M748,255 L760,265" stroke="#C9A961" strokeWidth="2"/>
+      <rect x="745" y="252" width="20" height="14" fill="#152844"/>
+    </g>
+    <rect width="800" height="520" fill="url(#cs-noise)"/>
+  </svg>
+);
+
+const OilField = ({ className = "" }) => (
+  <svg viewBox="0 0 800 520" className={className} preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="of-sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#83682E"/>
+        <stop offset="40%" stopColor="#A98843"/>
+        <stop offset="80%" stopColor="#C9A961"/>
+        <stop offset="100%" stopColor="#E0C589"/>
+      </linearGradient>
+      <linearGradient id="of-darksky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#0A1628"/>
+        <stop offset="60%" stopColor="#1F3556"/>
+        <stop offset="100%" stopColor="#83682E"/>
+      </linearGradient>
+      <pattern id="of-noise" width="3" height="3" patternUnits="userSpaceOnUse">
+        <circle cx="1" cy="1" r="0.5" fill="#06101F" opacity="0.08"/>
+      </pattern>
+    </defs>
+    {/* Use a navy-toned sky to fit brand instead of literal orange */}
+    <rect width="800" height="520" fill="url(#of-darksky)"/>
+    {/* sun glow */}
+    <circle cx="600" cy="380" r="160" fill="#C9A961" opacity="0.35"/>
+    <circle cx="600" cy="380" r="90" fill="#E0C589" opacity="0.45"/>
+    <circle cx="600" cy="380" r="50" fill="#F8F6F1" opacity="0.3"/>
+    {/* horizon line */}
+    <rect y="445" width="800" height="75" fill="#06101F"/>
+    <line x1="0" y1="445" x2="800" y2="445" stroke="#C9A961" strokeWidth="1" opacity="0.4"/>
+
+    {/* derrick towers in background */}
+    {[
+      { x: 60, h: 130, scale: 0.7 },
+      { x: 130, h: 150, scale: 0.85 },
+      { x: 190, h: 110, scale: 0.6 },
+      { x: 250, h: 140, scale: 0.78 },
+      { x: 700, h: 135, scale: 0.75 },
+      { x: 750, h: 120, scale: 0.65 },
+    ].map((d, i) => {
+      const baseY = 445;
+      const topY = baseY - d.h;
+      const bw = 32 * d.scale;
+      return (
+        <g key={i} stroke="#06101F" strokeWidth="1.2" fill="none" opacity="0.85">
+          <line x1={d.x - bw} y1={baseY} x2={d.x} y2={topY}/>
+          <line x1={d.x + bw} y1={baseY} x2={d.x} y2={topY}/>
+          <line x1={d.x - bw*0.6} y1={baseY} x2={d.x - bw*0.6} y2={topY + 20}/>
+          <line x1={d.x + bw*0.6} y1={baseY} x2={d.x + bw*0.6} y2={topY + 20}/>
+          {/* lattice cross-bracing */}
+          {[...Array(6)].map((_, k) => {
+            const t = k / 6;
+            const y = baseY - d.h * t;
+            const w = bw * (1 - t);
+            return (
+              <g key={k}>
+                <line x1={d.x - w} y1={y} x2={d.x + w} y2={y}/>
+                <line x1={d.x - w} y1={y} x2={d.x + w*0.7} y2={y - d.h/8}/>
+                <line x1={d.x + w} y1={y} x2={d.x - w*0.7} y2={y - d.h/8}/>
+              </g>
+            );
+          })}
+          <line x1={d.x} y1={topY} x2={d.x} y2={topY - 15}/>
+          <circle cx={d.x} cy={topY - 18} r="2" fill="#06101F"/>
+        </g>
+      );
+    })}
+
+    {/* main pumpjack — center hero */}
+    <g fill="#06101F">
+      {/* base platform */}
+      <rect x="350" y="430" width="180" height="15"/>
+      {/* a-frame supports */}
+      <polygon points="380,430 410,330 415,330 415,430"/>
+      <polygon points="500,430 470,330 475,330 475,430"/>
+      <line x1="395" y1="380" x2="490" y2="380" stroke="#06101F" strokeWidth="3"/>
+      {/* walking beam (horizontal lever) */}
+      <polygon points="370,310 540,310 540,330 370,330"/>
+      <polygon points="535,300 580,310 580,335 535,340"/>
+      {/* horse head */}
+      <path d="M555,295 Q600,290 605,330 Q605,355 555,350 Z"/>
+      {/* counter weight */}
+      <circle cx="380" cy="320" r="22"/>
+      <rect x="372" y="312" width="16" height="16" fill="#C9A961"/>
+      {/* polished rod down to wellhead */}
+      <line x1="600" y1="350" x2="600" y2="430" stroke="#06101F" strokeWidth="3"/>
+      {/* wellhead */}
+      <rect x="585" y="425" width="30" height="10"/>
+      <rect x="592" y="415" width="16" height="12"/>
+      {/* pivot */}
+      <circle cx="442" cy="320" r="10"/>
+      <circle cx="442" cy="320" r="4" fill="#C9A961"/>
+    </g>
+    {/* foreground derrick — taller, on left */}
+    <g stroke="#06101F" strokeWidth="1.6" fill="none">
+      <line x1="160" y1="445" x2="220" y2="180"/>
+      <line x1="280" y1="445" x2="220" y2="180"/>
+      <line x1="190" y1="445" x2="215" y2="200"/>
+      <line x1="250" y1="445" x2="225" y2="200"/>
+      {[...Array(10)].map((_, k) => {
+        const t = k / 10;
+        const y = 445 - 265 * t;
+        const xL = 160 + (220-160) * t;
+        const xR = 280 - (280-220) * t;
+        return (
+          <g key={k}>
+            <line x1={xL} y1={y} x2={xR} y2={y}/>
+            <line x1={xL} y1={y} x2={xR} y2={y - 26.5}/>
+            <line x1={xR} y1={y} x2={xL} y2={y - 26.5}/>
+          </g>
+        );
+      })}
+      <line x1="220" y1="180" x2="220" y2="155"/>
+      <circle cx="220" cy="152" r="3" fill="#06101F"/>
+    </g>
+    <rect width="800" height="520" fill="url(#of-noise)"/>
+  </svg>
+);
+
+window.PortGrain = PortGrain;
+window.ContainerStack = ContainerStack;
+window.OilField = OilField;
+
+// Reveal-on-scroll hook
+const useReveal = () => {
+  React.useEffect(() => {
+    const els = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    els.forEach(el => io.observe(el));
+    return () => io.disconnect();
+  });
+};
+
+// ────────────────────────────────────────────────────────────────────────
+// HEADER
+// ────────────────────────────────────────────────────────────────────────
+const Header = () => {
+  const [scrolled, setScrolled] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
+  React.useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  const links = [
+    { label: 'About', href: '#about' },
+    { label: 'Services', href: '#services' },
+    { label: 'How It Works', href: '#how' },
+    { label: 'Markets', href: '#markets' },
+    { label: 'Contact', href: '#contact' },
+  ];
+  return (
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'bg-paper-50/85 backdrop-blur-md border-b border-ink-800/8' : 'bg-transparent'}`}>
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-12 flex items-center justify-between h-[72px]">
+        <a href="#top" className="flex items-center gap-3 group">
+          <svg width="28" height="28" viewBox="0 0 32 32" className="shrink-0">
+            <circle cx="16" cy="16" r="15" fill="none" stroke="#0A1628" strokeWidth="1.2"/>
+            <path d="M6,16 Q16,6 26,16 Q16,26 6,16 Z" fill="none" stroke="#0A1628" strokeWidth="1"/>
+            <line x1="16" y1="1" x2="16" y2="31" stroke="#0A1628" strokeWidth="0.7" opacity="0.5"/>
+            <line x1="1" y1="16" x2="31" y2="16" stroke="#0A1628" strokeWidth="0.7" opacity="0.5"/>
+            <circle cx="16" cy="16" r="2" fill="#C9A961"/>
+          </svg>
+          <div className="leading-none">
+            <div className="text-[13px] tracking-[0.22em] font-semibold text-ink-800">ATLASWAY</div>
+            <div className="text-[9px] tracking-[0.32em] text-slate2-500 mt-0.5">TRADING&nbsp;&nbsp;LIMITED</div>
+          </div>
+        </a>
+        <nav className="hidden lg:flex items-center gap-9">
+          {links.map(l => (
+            <a key={l.href} href={l.href} className="nav-link text-[13px] tracking-[0.04em] text-ink-800/80 hover:text-ink-800 transition-colors">
+              {l.label}
+            </a>
+          ))}
+        </nav>
+        <div className="hidden lg:block">
+          <a href="#contact" className="btn-primary text-[12px]">
+            Get in Touch
+            <span className="arr">→</span>
+          </a>
+        </div>
+        <button onClick={() => setOpen(!open)} className="lg:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5">
+          <span className={`block w-5 h-px bg-ink-800 transition-transform ${open ? 'translate-y-[3px] rotate-45' : ''}`}></span>
+          <span className={`block w-5 h-px bg-ink-800 transition-transform ${open ? '-translate-y-[3px] -rotate-45' : ''}`}></span>
+        </button>
+      </div>
+      {open && (
+        <div className="lg:hidden bg-paper-50 border-t border-ink-800/10">
+          <div className="px-6 py-6 flex flex-col gap-4">
+            {links.map(l => (
+              <a key={l.href} href={l.href} onClick={() => setOpen(false)} className="text-[15px] text-ink-800">{l.label}</a>
+            ))}
+            <a href="#contact" onClick={() => setOpen(false)} className="btn-primary mt-2 self-start">Get in Touch <span>→</span></a>
+          </div>
+        </div>
+      )}
+    </header>
+  );
+};
+
+// ────────────────────────────────────────────────────────────────────────
+// HERO with animated routes
+// ────────────────────────────────────────────────────────────────────────
+const Hero = () => {
+  // World coordinates (rough) for animated trade routes
+  const ports = [
+    { x: 220, y: 200, label: 'ROTTERDAM' },
+    { x: 280, y: 240, label: 'GENOA' },
+    { x: 360, y: 215, label: 'NOVOROSSIYSK' },
+    { x: 440, y: 300, label: 'JEBEL ALI' },
+    { x: 580, y: 330, label: 'SINGAPORE' },
+    { x: 680, y: 295, label: 'HONG KONG' },
+    { x: 720, y: 245, label: 'SHANGHAI' },
+    { x: 110, y: 290, label: 'HOUSTON' },
+    { x: 165, y: 380, label: 'SANTOS' },
+  ];
+  const routes = [
+    [0, 7], [0, 5], [3, 6], [1, 6], [2, 5], [7, 5], [4, 6], [8, 0], [3, 5]
+  ];
+
+  return (
+    <section id="top" className="relative min-h-screen pt-[72px] overflow-hidden" style={{background:'#0A1628'}}>
+      {/* Background world / route map */}
+      <div className="absolute inset-0 pointer-events-none">
+        <svg viewBox="0 0 800 500" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <radialGradient id="hero-glow" cx="50%" cy="50%">
+              <stop offset="0%" stopColor="#C9A961" stopOpacity="0.12"/>
+              <stop offset="60%" stopColor="#C9A961" stopOpacity="0"/>
+            </radialGradient>
+          </defs>
+          {/* faint grid */}
+          <g stroke="#F8F6F1" strokeWidth="0.4" opacity="0.05">
+            {[...Array(20)].map((_, i) => <line key={'h'+i} x1="0" y1={i*25} x2="800" y2={i*25}/>)}
+            {[...Array(32)].map((_, i) => <line key={'v'+i} x1={i*25} y1="0" x2={i*25} y2="500"/>)}
+          </g>
+          {/* meridians */}
+          <g stroke="#F8F6F1" strokeWidth="0.5" fill="none" opacity="0.07">
+            <ellipse cx="400" cy="250" rx="380" ry="180"/>
+            <ellipse cx="400" cy="250" rx="280" ry="135"/>
+            <ellipse cx="400" cy="250" rx="180" ry="90"/>
+            <line x1="400" y1="20" x2="400" y2="480"/>
+            <line x1="20" y1="250" x2="780" y2="250"/>
+          </g>
+          {/* route lines */}
+          {routes.map(([a, b], i) => {
+            const p1 = ports[a], p2 = ports[b];
+            const cx = (p1.x + p2.x) / 2;
+            const cy = Math.min(p1.y, p2.y) - 40 - i*4;
+            return (
+              <path key={i} d={`M${p1.x},${p1.y} Q${cx},${cy} ${p2.x},${p2.y}`}
+                fill="none" stroke="#C9A961" strokeWidth="1" opacity="0.45" className="route-dash" style={{ animationDelay: `${i * -2}s` }}/>
+            );
+          })}
+          {/* port nodes */}
+          {ports.map((p, i) => (
+            <g key={i}>
+              <circle cx={p.x} cy={p.y} r="2.5" fill="#F8F6F1" opacity="0.5"/>
+              <circle cx={p.x} cy={p.y} r="1" fill="#C9A961"/>
+            </g>
+          ))}
+          <rect width="800" height="500" fill="url(#hero-glow)"/>
+        </svg>
+      </div>
+
+      <div className="relative max-w-[1400px] mx-auto px-6 lg:px-12 pt-20 lg:pt-28 pb-32">
+        <div className="grid lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-8 reveal">
+            <div className="flex items-center gap-3 mb-8">
+              <span className="num-label text-gold-400">01 — Atlasway</span>
+              <span className="h-px w-16 bg-paper-100/30"></span>
+              <span className="num-label text-paper-100/50">Hong Kong</span>
+            </div>
+            <h1 className="display text-[clamp(44px,7vw,104px)] text-paper-50">
+              Global Physical<br/>
+              Trading.<br/>
+              <span className="italic text-gold-400">Real Assets.</span> Real Value.
+            </h1>
+            <p className="mt-10 max-w-2xl text-[17px] leading-relaxed text-paper-100/65 reveal reveal-delay-2">
+              ATLASWAY connects producers and consumers across continents — moving raw materials,
+              metals, energy and agricultural commodities through the channels of global commerce.
+            </p>
+            <div className="mt-10 flex flex-wrap items-center gap-6 reveal reveal-delay-3">
+              <a href="#services" style={{background:'#F8F6F1',color:'#0A1628',borderColor:'#F8F6F1'}} className="btn-primary">
+                Explore Our Services
+                <span className="arr">→</span>
+              </a>
+              <a href="#how" style={{color:'#F8F6F1'}} className="btn-ghost">
+                How It Works
+                <span>↓</span>
+              </a>
+            </div>
+          </div>
+
+          <aside className="lg:col-span-4 lg:pt-32 reveal reveal-delay-3">
+            <div className="border-l border-paper-100/15 pl-6 space-y-6">
+              <div>
+                <div className="num-label text-paper-100/45">Headquarters</div>
+                <div className="text-sm mt-2 text-paper-100/85 leading-relaxed">
+                  RM 5003, 5/F, Yau Lee Centre<br/>
+                  45 Hoi Yuen Road, Kwun Tong<br/>
+                  Hong Kong S.A.R.
+                </div>
+              </div>
+              <div>
+                <div className="num-label text-paper-100/45">Coordinates</div>
+                <div className="text-sm mt-2 font-mono text-paper-100/85">22.3098° N · 114.2261° E</div>
+              </div>
+              <div>
+                <div className="num-label text-paper-100/45">Reach</div>
+                <div className="text-sm mt-2 text-paper-100/85">Six continents · Year-round operations</div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      {/* bottom rail with ticker */}
+      <div className="absolute bottom-0 left-0 right-0 border-t border-paper-100/10 bg-ink-900/70 backdrop-blur-sm">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-12 h-12 flex items-center gap-6 overflow-hidden ticker-row">
+          <span className="num-label text-gold-400 shrink-0">LIVE · INDICATIVE</span>
+          <div className="marquee flex gap-10 shrink-0 whitespace-nowrap">
+            {[...Array(2)].map((_, k) => (
+              <div key={k} className="flex gap-10">
+                <Tick label="BRENT CRUDE" val="$84.20" delta="+0.42"/>
+                <Tick label="LNG / JKM" val="$13.85" delta="-0.18"/>
+                <Tick label="COPPER" val="$9,842/t" delta="+18"/>
+                <Tick label="ALUMINIUM" val="$2,514/t" delta="+6"/>
+                <Tick label="HRC STEEL" val="$682/t" delta="-3"/>
+                <Tick label="WHEAT" val="$208/t" delta="+1.10"/>
+                <Tick label="SOYBEANS" val="$11.42" delta="-0.06"/>
+                <Tick label="SUGAR #11" val="22.4¢" delta="+0.12"/>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const Tick = ({ label, val, delta }) => {
+  const up = !delta.startsWith('-');
+  return (
+    <div className="flex items-center gap-3 text-[12px]">
+      <span className="num-label text-paper-100/55">{label}</span>
+      <span className="font-mono font-semibold text-paper-50">{val}</span>
+      <span className={`font-mono ${up ? 'text-[#3a8a5b]' : 'text-[#a44a4a]'}`}>{up ? '▲' : '▼'} {delta}</span>
+    </div>
+  );
+};
+
+// helper: scatter dots inside a polygon's bounding region
+function generateDots(points, r, count) {
+  const xs = points.map(p => p[0]);
+  const ys = points.map(p => p[1]);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const minY = Math.min(...ys), maxY = Math.max(...ys);
+  const dots = [];
+  let seed = points.reduce((a, p) => a + p[0] + p[1], 0);
+  const rand = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+  for (let i = 0; i < count; i++) {
+    const x = minX + rand() * (maxX - minX);
+    const y = minY + rand() * (maxY - minY);
+    if (pointInPoly(x, y, points)) {
+      dots.push(<circle key={i} cx={x} cy={y} r={r * (0.5 + rand()*0.6)}/>);
+    }
+  }
+  return dots;
+}
+function pointInPoly(x, y, vs) {
+  let inside = false;
+  for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+    const xi = vs[i][0], yi = vs[i][1];
+    const xj = vs[j][0], yj = vs[j][1];
+    const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// WHO WE ARE
+// ────────────────────────────────────────────────────────────────────────
+const About = () => (
+  <section id="about" className="relative py-32 lg:py-40 bg-paper-50">
+    <div className="max-w-[1400px] mx-auto px-6 lg:px-12 grid lg:grid-cols-12 gap-12">
+      <div className="lg:col-span-4 reveal">
+        <div className="num-label text-gold-600 mb-6">02 — Who We Are</div>
+        <div className="sticky top-32">
+          <h2 className="display text-[44px] lg:text-[64px] text-ink-800">
+            A trading house<br/>built on <span className="italic">tangible</span><br/>commerce.
+          </h2>
+        </div>
+      </div>
+      <div className="lg:col-span-7 lg:col-start-6 space-y-10 reveal reveal-delay-2">
+        <p className="text-[20px] lg:text-[24px] leading-[1.5] text-ink-800/85 font-light">
+          ATLASWAY TRADING LIMITED is an international trading company registered in Hong Kong.
+          We source physical commodities from producers, organise their movement across global
+          supply chains, and deliver them to end consumers worldwide.
+        </p>
+        <p className="text-[16px] leading-[1.7] text-ink-800/65">
+          Our work sits where the documentary side of trade meets the physical one — vessels,
+          warehouses, contracts, customs. We build the bridge between an offer at one port
+          and a demand at another, and we take responsibility for everything between.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-10 pt-10 border-t border-ink-800/10">
+          <Stat k="Hong Kong" v="Registered jurisdiction"/>
+          <Stat k="6" v="Continents covered"/>
+          <Stat k="24/7" v="Operations & desk cover"/>
+          <Stat k="Energy" v="Crude · LNG · Coal"/>
+          <Stat k="Metals" v="Cu · Al · Steel"/>
+          <Stat k="Agri" v="Wheat · Soy · Sugar · Cotton"/>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+const Stat = ({ k, v }) => (
+  <div>
+    <div className="display text-[28px] lg:text-[34px] text-ink-800">{k}</div>
+    <div className="num-label text-ink-800/50 mt-1">{v}</div>
+  </div>
+);
+
+// ────────────────────────────────────────────────────────────────────────
+// SERVICES
+// ────────────────────────────────────────────────────────────────────────
+const Services = () => {
+  const items = [
+    {
+      n: '01',
+      title: 'Physical Commodity Trading',
+      body: 'Origination, structuring and execution of spot and term contracts across energy, metals and agricultural markets. We take title, manage exposure, and deliver against firm specifications.',
+      tags: ['Spot', 'Term', 'CIF / FOB', 'Letters of credit']
+    },
+    {
+      n: '02',
+      title: 'Logistics & Supply Chain',
+      body: 'Vessel chartering, terminal handling, in-transit storage and last-mile delivery — coordinated as a single operation. Visibility from loading port to discharge.',
+      tags: ['Chartering', 'Storage', 'Inspection', 'Customs']
+    },
+    {
+      n: '03',
+      title: 'Risk Management',
+      body: 'Hedging programmes against price, currency and freight volatility. We use exchange-traded and OTC instruments to lock in margin and protect counterparty positions.',
+      tags: ['Hedging', 'FX', 'Freight', 'Counterparty']
+    },
+    {
+      n: '04',
+      title: 'Market Analysis',
+      body: 'Continuous monitoring of supply, demand and arbitrage windows across regions. Internal research feeds origination decisions and informs counterparty advisory.',
+      tags: ['Research', 'Arbitrage', 'Forwards', 'Advisory']
+    },
+  ];
+  return (
+    <section id="services" className="relative py-32 lg:py-40 bg-ink-800 text-paper-50 overflow-hidden">
+      {/* faint grid */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.06]"
+        style={{ backgroundImage: 'linear-gradient(#F8F6F1 1px, transparent 1px), linear-gradient(90deg, #F8F6F1 1px, transparent 1px)', backgroundSize: '80px 80px' }}/>
+      <div className="relative max-w-[1400px] mx-auto px-6 lg:px-12">
+        <div className="flex items-end justify-between flex-wrap gap-6 mb-20 reveal">
+          <div>
+            <div className="num-label text-gold-400 mb-6">03 — Services</div>
+            <h2 className="display text-[44px] lg:text-[68px] max-w-3xl">
+              Four disciplines, <span className="italic text-gold-400">one</span> integrated desk.
+            </h2>
+          </div>
+          <div className="text-paper-200/60 text-[14px] max-w-sm leading-relaxed">
+            Each engagement combines all four — physical, logistics, risk, and intelligence —
+            under a single counterparty.
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-px bg-paper-50/10">
+          {items.map((it, i) => (
+            <article key={it.n}
+              className={`relative p-10 lg:p-12 bg-ink-800 card-hover hover:bg-ink-700 reveal reveal-delay-${(i % 4) + 1}`}>
+              <div className="flex items-baseline justify-between mb-8">
+                <span className="num-label text-gold-400">{it.n}</span>
+                <span className="num-label text-paper-200/35">Service</span>
+              </div>
+              <h3 className="display text-[28px] lg:text-[34px] mb-5">{it.title}</h3>
+              <p className="text-paper-200/70 text-[15px] leading-[1.7] max-w-md">{it.body}</p>
+              <div className="mt-8 flex flex-wrap gap-2">
+                {it.tags.map(t => (
+                  <span key={t} className="num-label text-paper-200/60 border border-paper-200/15 px-3 py-1.5">{t}</span>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ────────────────────────────────────────────────────────────────────────
+// HOW IT WORKS
+// ────────────────────────────────────────────────────────────────────────
+const HowItWorks = () => {
+  const steps = [
+    { n: '01', k: 'Sourcing', d: 'Producer engagement, specification verification, and supply-side diligence at origin.' },
+    { n: '02', k: 'Agreement', d: 'Contract structuring, price fixation, payment instruments and risk allocation.' },
+    { n: '03', k: 'Logistics', d: 'Vessel nomination, port handling, storage, inspection and in-transit documentation.' },
+    { n: '04', k: 'Delivery', d: 'Discharge, customs clearance, final-mile coordination and post-trade reconciliation.' },
+  ];
+  return (
+    <section id="how" className="relative py-32 lg:py-40 bg-paper-50 grain">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
+        <div className="reveal mb-20 max-w-3xl">
+          <div className="num-label text-gold-600 mb-6">04 — How It Works</div>
+          <h2 className="display text-[44px] lg:text-[68px] text-ink-800">
+            From <span className="italic">origin</span> to discharge — four stages, one transaction.
+          </h2>
+        </div>
+
+        <div className="relative">
+          {/* connecting line */}
+          <div className="hidden lg:block absolute top-[44px] left-0 right-0 h-px hairline"></div>
+          <div className="grid lg:grid-cols-4 gap-px lg:gap-0">
+            {steps.map((s, i) => (
+              <div key={s.n} className={`relative pt-12 lg:pt-0 reveal reveal-delay-${i+1}`}>
+                {/* node */}
+                <div className="flex items-center gap-4 lg:block">
+                  <div className="relative lg:mb-10">
+                    <div className="w-3 h-3 bg-gold-500 rounded-full lg:mt-[37px]"></div>
+                    <div className="absolute inset-0 w-3 h-3 bg-gold-500 rounded-full lg:mt-[37px] pulse-dot"></div>
+                  </div>
+                  <div className="num-label text-ink-800/45 lg:hidden">{s.n}</div>
+                </div>
+                <div className="lg:pr-12 lg:pt-0 pt-2">
+                  <div className="num-label text-ink-800/45 hidden lg:block mb-3">{s.n}</div>
+                  <h3 className="display text-[28px] text-ink-800 mb-3">{s.k}</h3>
+                  <p className="text-[14px] leading-[1.7] text-ink-800/65 max-w-xs">{s.d}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ────────────────────────────────────────────────────────────────────────
+// MARKETS — with three illustration plates
+// ────────────────────────────────────────────────────────────────────────
+const Markets = () => {
+  const groups = [
+    {
+      n: '01',
+      label: 'Energy',
+      items: ['Crude Oil', 'LNG', 'Coal'],
+      Plate: window.OilField,
+      caption: 'Wellhead to refinery — crude, condensate and gas.'
+    },
+    {
+      n: '02',
+      label: 'Metals',
+      items: ['Copper', 'Aluminium', 'Steel'],
+      Plate: window.ContainerStack,
+      caption: 'Cathode, billet and coil moving through global ports.'
+    },
+    {
+      n: '03',
+      label: 'Agriculture',
+      items: ['Wheat', 'Soybeans', 'Sugar', 'Cotton'],
+      Plate: window.PortGrain,
+      caption: 'Bulk grain, oilseeds and softs from origin to mill.'
+    },
+  ];
+  const allTags = ['Crude Oil', 'LNG', 'Coal', 'Copper', 'Aluminium', 'Steel', 'Wheat', 'Soybeans', 'Sugar', 'Cotton'];
+  return (
+    <section id="markets" className="relative py-32 lg:py-40 bg-paper-100">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
+        <div className="reveal mb-20 grid lg:grid-cols-12 gap-8 items-end">
+          <div className="lg:col-span-7">
+            <div className="num-label text-gold-600 mb-6">05 — Markets</div>
+            <h2 className="display text-[44px] lg:text-[68px] text-ink-800">
+              The commodities<br/>we move.
+            </h2>
+          </div>
+          <p className="lg:col-span-4 lg:col-start-9 text-[15px] leading-[1.7] text-ink-800/65">
+            Across three core verticals — energy, industrial metals and agricultural staples —
+            we operate where physical fundamentals drive global pricing.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6 mb-20">
+          {groups.map((g, i) => {
+            const Plate = g.Plate;
+            return (
+              <article key={g.n} className={`group bg-paper-50 overflow-hidden card-hover reveal reveal-delay-${i+1}`}>
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  {Plate && <Plate className="w-full h-full plate transition-transform duration-700 group-hover:scale-105"/>}
+                  <div className="absolute top-4 left-4 num-label text-paper-50 bg-ink-800/70 backdrop-blur px-2 py-1">
+                    {g.n} · {g.label}
+                  </div>
+                </div>
+                <div className="p-7">
+                  <h3 className="display text-[26px] text-ink-800 mb-2">{g.label}</h3>
+                  <p className="text-[13px] text-ink-800/60 leading-relaxed mb-5">{g.caption}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {g.items.map(t => (
+                      <span key={t} className="num-label text-ink-800/70 border border-ink-800/15 px-2.5 py-1">{t}</span>
+                    ))}
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+
+        {/* tag wall */}
+        <div className="reveal pt-12 border-t border-ink-800/10">
+          <div className="num-label text-ink-800/45 mb-6">All commodities</div>
+          <div className="flex flex-wrap gap-3">
+            {allTags.map((t, i) => (
+              <span key={t} className="market-tag inline-flex items-center gap-2 border border-ink-800/20 px-4 py-2.5 text-[14px] text-ink-800 cursor-default">
+                <span className="dot inline-block w-1.5 h-1.5 bg-gold-500 rounded-full"></span>
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+window.useReveal = useReveal;
+window.Header = Header;
+window.Hero = Hero;
+window.About = About;
+window.Services = Services;
+window.HowItWorks = HowItWorks;
+window.Markets = Markets;
+
+// ────────────────────────────────────────────────────────────────────────
+// COMPLIANCE
+// ────────────────────────────────────────────────────────────────────────
+const Compliance = () => (
+  <section className="relative py-28 lg:py-32 bg-ink-900 text-paper-100 overflow-hidden">
+    <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
+      style={{ backgroundImage: 'linear-gradient(#F8F6F1 1px, transparent 1px)', backgroundSize: '100% 32px' }}/>
+    <div className="relative max-w-[1400px] mx-auto px-6 lg:px-12 grid lg:grid-cols-12 gap-12">
+      <div className="lg:col-span-4 reveal">
+        <div className="num-label text-gold-400 mb-6">06 — Compliance & Legal</div>
+        <h2 className="display text-[36px] lg:text-[52px]">
+          Operating to <span className="italic text-gold-400">law</span>, audit and trade convention.
+        </h2>
+      </div>
+      <div className="lg:col-span-7 lg:col-start-6 space-y-8 reveal reveal-delay-2">
+        <p className="text-[16px] leading-[1.8] text-paper-100/75">
+          ATLASWAY TRADING LIMITED operates in accordance with the laws of Hong Kong and applicable
+          international trade frameworks. We adhere to standards covering sanctions, anti-money
+          laundering, know-your-counterparty, and the documentary practices of physical commerce
+          (UCP 600, Incoterms 2020).
+        </p>
+        <div className="grid sm:grid-cols-3 gap-6 pt-8 border-t border-paper-100/10">
+          {[
+            { k: 'KYC / AML', d: 'Counterparty diligence on every new engagement.' },
+            { k: 'Sanctions', d: 'Screening against OFAC, UK, EU and UN regimes.' },
+            { k: 'Documentary', d: 'Incoterms 2020 · UCP 600 · ISBP 821.' },
+          ].map(c => (
+            <div key={c.k}>
+              <div className="num-label text-gold-400 mb-2">{c.k}</div>
+              <div className="text-[13px] text-paper-100/65 leading-relaxed">{c.d}</div>
+            </div>
+          ))}
+        </div>
+        <div className="pt-8 flex flex-wrap gap-x-8 gap-y-2 text-[13px] text-paper-100/55">
+          <a href="#" className="hover:text-gold-400 transition">Terms of Service</a>
+          <a href="#" className="hover:text-gold-400 transition">Privacy Policy</a>
+          <a href="#" className="hover:text-gold-400 transition">Cookie Policy</a>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+// ────────────────────────────────────────────────────────────────────────
+// CONTACT — interactive form
+// ────────────────────────────────────────────────────────────────────────
+const Contact = () => {
+  const [form, setForm] = React.useState({ name: '', company: '', email: '', message: '' });
+  const [errors, setErrors] = React.useState({});
+  const [status, setStatus] = React.useState('idle'); // idle | sending | sent
+  const upd = (k) => (e) => { setForm(s => ({ ...s, [k]: e.target.value })); setErrors(es => ({ ...es, [k]: undefined })); };
+
+  const submit = (e) => {
+    e.preventDefault();
+    const errs = {};
+    if (!form.name.trim()) errs.name = 'Required';
+    if (!form.email.trim() || !/^\S+@\S+\.\S+$/.test(form.email)) errs.email = 'Valid email required';
+    if (!form.message.trim()) errs.message = 'Tell us briefly what you need';
+    setErrors(errs);
+    if (Object.keys(errs).length) return;
+    setStatus('sending');
+    setTimeout(() => setStatus('sent'), 900);
+  };
+
+  return (
+    <section id="contact" className="relative py-32 lg:py-40 bg-paper-50">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-12 grid lg:grid-cols-12 gap-16">
+        <div className="lg:col-span-5 reveal">
+          <div className="num-label text-gold-600 mb-6">07 — Contact</div>
+          <h2 className="display text-[44px] lg:text-[64px] text-ink-800 mb-10">
+            Open a<br/><span className="italic">conversation.</span>
+          </h2>
+          <p className="text-[15px] leading-[1.7] text-ink-800/65 max-w-md mb-12">
+            Whether you're a producer with allocation, a buyer with demand, or a counterparty with
+            a structured opportunity — start with a brief.
+          </p>
+
+          <div className="space-y-8">
+            <div>
+              <div className="num-label text-ink-800/45 mb-2">Direct line</div>
+              <a href="tel:+447537102578" className="display text-[24px] text-ink-800 hover:text-gold-600 transition">+44 7537 102 578</a>
+            </div>
+            <div>
+              <div className="num-label text-ink-800/45 mb-2">Office</div>
+              <div className="text-[14px] leading-[1.7] text-ink-800/85">
+                ATLASWAY TRADING LIMITED<br/>
+                RM 5003, 5/F, Yau Lee Centre<br/>
+                45 Hoi Yuen Road, Kwun Tong<br/>
+                Hong Kong S.A.R.
+              </div>
+            </div>
+            <div>
+              <div className="num-label text-ink-800/45 mb-2">Hours</div>
+              <div className="text-[14px] text-ink-800/85">Desk cover · 24 / 7 · HKT</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-6 lg:col-start-7 reveal reveal-delay-2">
+          {status === 'sent' ? (
+            <div className="border border-ink-800/15 p-12 bg-paper-100/40">
+              <div className="num-label text-gold-600 mb-4">Message received</div>
+              <h3 className="display text-[32px] text-ink-800 mb-3">Thank you, {form.name.split(' ')[0] || 'there'}.</h3>
+              <p className="text-[14px] text-ink-800/70 leading-relaxed mb-8">
+                A member of the desk will respond within one business day. For urgent matters, please use the direct line.
+              </p>
+              <button onClick={() => { setStatus('idle'); setForm({ name:'', company:'', email:'', message:'' }); }}
+                className="btn-ghost">Send another <span>↻</span></button>
+            </div>
+          ) : (
+            <form onSubmit={submit} className="space-y-2">
+              <div className="grid sm:grid-cols-2 gap-x-10">
+                <Field label="Name" required value={form.name} onChange={upd('name')} err={errors.name}/>
+                <Field label="Company" value={form.company} onChange={upd('company')} err={errors.company}/>
+              </div>
+              <Field label="Email" type="email" required value={form.email} onChange={upd('email')} err={errors.email}/>
+              <Field label="Message" textarea required value={form.message} onChange={upd('message')} err={errors.message}/>
+              <div className="pt-8">
+                <button type="submit" disabled={status==='sending'} className="btn-primary disabled:opacity-60">
+                  {status === 'sending' ? 'Sending…' : 'Send message'}
+                  <span className="arr">→</span>
+                </button>
+              </div>
+              <p className="pt-4 text-[12px] text-ink-800/45 leading-relaxed max-w-md">
+                By sending you agree we may contact you regarding your enquiry. We do not share details with third parties.
+              </p>
+            </form>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const Field = ({ label, value, onChange, type='text', textarea, err, required }) => (
+  <div className="py-2">
+    <label className="num-label text-ink-800/55 flex items-center gap-2">
+      {label}
+      {required && <span className="text-gold-600">*</span>}
+      {err && <span className="ml-auto text-[#a44a4a] normal-case tracking-normal text-[11px]">{err}</span>}
+    </label>
+    {textarea
+      ? <textarea rows="4" value={value} onChange={onChange} placeholder="Briefly — commodity, volume, lane, timing"/>
+      : <input type={type} value={value} onChange={onChange} placeholder={label === 'Email' ? 'name@company.com' : ''}/>
+    }
+  </div>
+);
+
+// ────────────────────────────────────────────────────────────────────────
+// FOOTER
+// ────────────────────────────────────────────────────────────────────────
+const Footer = () => (
+  <footer className="relative bg-ink-900 text-paper-100 pt-20 pb-10 overflow-hidden">
+    <div className="absolute inset-x-0 top-0 h-px hairline-light"></div>
+    <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
+      <div className="grid lg:grid-cols-12 gap-10 mb-20">
+        <div className="lg:col-span-5">
+          <div className="flex items-center gap-3 mb-8">
+            <svg width="36" height="36" viewBox="0 0 32 32">
+              <circle cx="16" cy="16" r="15" fill="none" stroke="#F8F6F1" strokeWidth="1.2"/>
+              <path d="M6,16 Q16,6 26,16 Q16,26 6,16 Z" fill="none" stroke="#F8F6F1" strokeWidth="1"/>
+              <line x1="16" y1="1" x2="16" y2="31" stroke="#F8F6F1" strokeWidth="0.7" opacity="0.5"/>
+              <line x1="1" y1="16" x2="31" y2="16" stroke="#F8F6F1" strokeWidth="0.7" opacity="0.5"/>
+              <circle cx="16" cy="16" r="2" fill="#C9A961"/>
+            </svg>
+            <div className="leading-none">
+              <div className="text-[15px] tracking-[0.22em] font-semibold">ATLASWAY</div>
+              <div className="text-[10px] tracking-[0.32em] text-paper-100/55 mt-1">TRADING&nbsp;&nbsp;LIMITED</div>
+            </div>
+          </div>
+          <p className="text-[14px] leading-[1.7] text-paper-100/60 max-w-sm">
+            Global physical trading. Real assets, moved between real places, against real contracts.
+          </p>
+        </div>
+
+        <div className="lg:col-span-3">
+          <div className="num-label text-gold-400 mb-5">Office</div>
+          <div className="text-[13px] leading-[1.8] text-paper-100/75">
+            RM 5003, 5/F, Yau Lee Centre<br/>
+            45 Hoi Yuen Road, Kwun Tong<br/>
+            Hong Kong S.A.R.
+          </div>
+        </div>
+
+        <div className="lg:col-span-2">
+          <div className="num-label text-gold-400 mb-5">Contact</div>
+          <a href="tel:+447537102578" className="block text-[13px] text-paper-100/75 hover:text-gold-400 transition">+44 7537 102 578</a>
+        </div>
+
+        <div className="lg:col-span-2">
+          <div className="num-label text-gold-400 mb-5">Navigate</div>
+          <ul className="space-y-2 text-[13px]">
+            {['About', 'Services', 'How It Works', 'Markets', 'Contact'].map(l => (
+              <li key={l}><a href={`#${l.toLowerCase().replace(/\s/g,'')}`} className="text-paper-100/70 hover:text-gold-400 transition">{l}</a></li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div className="pt-8 border-t border-paper-100/10 flex flex-wrap items-center justify-between gap-4">
+        <div className="text-[12px] text-paper-100/50">© 2025 ATLASWAY TRADING LIMITED. All rights reserved.</div>
+        <div className="flex flex-wrap gap-x-6 gap-y-2 text-[12px] text-paper-100/50">
+          <a href="#" className="hover:text-gold-400 transition">Terms of Service</a>
+          <a href="#" className="hover:text-gold-400 transition">Privacy Policy</a>
+          <a href="#" className="hover:text-gold-400 transition">Cookie Policy</a>
+        </div>
+        <div className="text-[11px] font-mono text-paper-100/35">22.3098°N · 114.2261°E</div>
+      </div>
+    </div>
+  </footer>
+);
+
+window.Compliance = Compliance;
+window.Contact = Contact;
+window.Footer = Footer;
+
+const App = () => {
+  window.useReveal();
+  return (
+    <div className="min-h-screen">
+      <window.Header/>
+      <main>
+        <window.Hero/>
+        <window.About/>
+        <window.Services/>
+        <window.HowItWorks/>
+        <window.Markets/>
+        <window.Compliance/>
+        <window.Contact/>
+      </main>
+      <window.Footer/>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+
+</script>
+</body>
+</html>
