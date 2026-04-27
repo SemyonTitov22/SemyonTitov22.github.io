@@ -1192,7 +1192,7 @@ const Field = ({ label, value, onChange, type='text', textarea, err, required })
 // ────────────────────────────────────────────────────────────────────────
 // FOOTER
 // ────────────────────────────────────────────────────────────────────────
-const Footer = () => (
+const Footer = ({ onOpenModal }) => (
   <footer className="relative bg-ink-900 text-paper-100 pt-20 pb-10 overflow-hidden">
     <div className="absolute inset-x-0 top-0 h-px hairline-light"></div>
     <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
@@ -1243,9 +1243,9 @@ const Footer = () => (
       <div className="pt-8 border-t border-paper-100/10 flex flex-wrap items-center justify-between gap-4">
         <div className="text-[12px] text-paper-100/50">© 2025 ATLASWAY TRADING LIMITED. All rights reserved.</div>
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-[12px] text-paper-100/50">
-          <a href="#" className="hover:text-gold-400 transition">Terms of Service</a>
-          <a href="#" className="hover:text-gold-400 transition">Privacy Policy</a>
-          <a href="#" className="hover:text-gold-400 transition">Cookie Policy</a>
+          <button onClick={() => onOpenModal('terms')} className="hover:text-gold-400 transition">Terms of Service</button>
+          <button onClick={() => onOpenModal('privacy')} className="hover:text-gold-400 transition">Privacy Policy</button>
+          <button onClick={() => onOpenModal('cookies')} className="hover:text-gold-400 transition">Cookie Policy</button>
         </div>
         <div className="text-[11px] font-mono text-paper-100/35">22.3098°N · 114.2261°E</div>
       </div>
@@ -1257,8 +1257,144 @@ window.Compliance = Compliance;
 window.Contact = Contact;
 window.Footer = Footer;
 
+// ────────────────────────────────────────────────────────────────────────
+// LEGAL MODAL
+// ────────────────────────────────────────────────────────────────────────
+const legalContent = {
+  terms: {
+    title: 'Terms of Service',
+    sections: [
+      { heading: '1. Acceptance of Terms', body: 'By accessing or using any services provided by ATLASWAY TRADING LIMITED ("Atlasway", "we", "us"), you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any part of these terms, you may not use our services.' },
+      { heading: '2. Services', body: 'Atlasway provides physical commodity trading services including but not limited to procurement, logistics coordination, trade finance facilitation, and related advisory services. All services are subject to applicable international trade regulations, export controls, and sanctions regimes.' },
+      { heading: '3. Eligibility', body: 'Our services are available only to businesses and entities operating in compliance with applicable laws. We reserve the right to refuse service to any entity that does not meet our counterparty due diligence requirements.' },
+      { heading: '4. Confidentiality', body: 'All commercial terms, pricing, counterparty information, and transaction details shared between parties shall be treated as strictly confidential. Neither party shall disclose such information to third parties without prior written consent.' },
+      { heading: '5. Limitation of Liability', body: 'To the fullest extent permitted by applicable law, Atlasway shall not be liable for any indirect, incidental, consequential, or punitive damages arising from the use of our services, including but not limited to loss of profits, data, or business opportunities.' },
+      { heading: '6. Governing Law', body: 'These Terms of Service shall be governed by and construed in accordance with the laws of the Hong Kong Special Administrative Region. Any disputes arising hereunder shall be subject to the exclusive jurisdiction of the courts of Hong Kong S.A.R.' },
+      { heading: '7. Amendments', body: 'Atlasway reserves the right to modify these Terms of Service at any time. Continued use of our services following any such modifications constitutes acceptance of the updated terms.' },
+    ]
+  },
+  privacy: {
+    title: 'Privacy Policy',
+    sections: [
+      { heading: '1. Data We Collect', body: 'We collect information you provide directly to us, including name, company, email address, phone number, and business details submitted through our contact forms or during the course of a business relationship. We may also collect technical data such as IP addresses and browser information when you visit our website.' },
+      { heading: '2. How We Use Your Data', body: 'Your personal data is used solely for the purpose of responding to inquiries, conducting counterparty due diligence (KYC/AML), fulfilling contractual obligations, and improving our services. We do not use your data for automated profiling or marketing without your explicit consent.' },
+      { heading: '3. Data Sharing', body: 'We do not sell or rent your personal data to third parties. We may share data with trusted service providers under strict confidentiality agreements, or where required by law, court order, or regulatory authority (including sanctions screening bodies such as OFAC, HM Treasury, and UN).' },
+      { heading: '4. Data Retention', body: 'We retain personal data for as long as necessary to fulfil the purposes for which it was collected, comply with legal obligations, resolve disputes, and enforce agreements. Trade-related records are typically retained for a minimum of seven years.' },
+      { heading: '5. Your Rights', body: 'Subject to applicable law, you have the right to access, correct, or delete your personal data held by us. To exercise these rights, please contact us at the address provided on this website. We will respond within 30 days.' },
+      { heading: '6. Security', body: 'We implement appropriate technical and organisational measures to protect your personal data against unauthorised access, alteration, disclosure, or destruction. However, no method of transmission over the internet is 100% secure.' },
+      { heading: '7. Contact', body: 'For any privacy-related queries, please contact ATLASWAY TRADING LIMITED, RM 5003, 5/F, Yau Lee Centre, 45 Hoi Yuen Road, Kwun Tong, Hong Kong S.A.R.' },
+    ]
+  },
+  cookies: {
+    title: 'Cookie Policy',
+    sections: [
+      { heading: '1. What Are Cookies', body: 'Cookies are small text files placed on your device when you visit a website. They allow the website to recognise your device and store information about your preferences or past actions.' },
+      { heading: '2. Cookies We Use', body: 'This website uses strictly necessary cookies to ensure basic functionality such as page navigation and security. We do not use advertising cookies, tracking pixels, or third-party analytics cookies that identify you personally.' },
+      { heading: '3. Strictly Necessary Cookies', body: 'These cookies are essential for the website to function and cannot be switched off. They are set in response to actions you take, such as setting privacy preferences or filling in forms. No personal data is stored beyond the session.' },
+      { heading: '4. Performance & Analytics', body: 'If we use any performance cookies in the future, they will only collect aggregated, anonymised data about how visitors use the site — such as pages visited and time spent. No individual user is identified.' },
+      { heading: '5. Managing Cookies', body: "You can control and delete cookies through your browser settings. Disabling cookies may affect some functionality of this website. For instructions on managing cookies, refer to your browser's help documentation." },
+      { heading: '6. Updates', body: 'This Cookie Policy may be updated periodically to reflect changes in technology or legislation. The most recent version will always be available on this website.' },
+    ]
+  }
+};
+
+const LegalModal = ({ type, onClose }) => {
+  const data = legalContent[type];
+  if (!data) return null;
+  React.useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    const onKey = e => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', onKey); };
+  }, []);
+  return (
+    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-4 sm:p-8"
+      style={{background:'rgba(6,16,31,0.75)', backdropFilter:'blur(6px)'}}>
+      <div className="relative w-full max-w-2xl max-h-[85vh] flex flex-col"
+        style={{background:'#0F1D34', border:'1px solid rgba(201,169,97,0.2)'}}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-8 py-6 border-b" style={{borderColor:'rgba(248,246,241,0.08)'}}>
+          <div>
+            <div className="num-label text-gold-400 mb-1">ATLASWAY TRADING LIMITED</div>
+            <h2 className="display text-[28px] text-paper-50">{data.title}</h2>
+          </div>
+          <button onClick={onClose}
+            className="w-9 h-9 flex items-center justify-center transition"
+            style={{border:'1px solid rgba(248,246,241,0.15)', color:'rgba(248,246,241,0.6)'}}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor='#C9A961';e.currentTarget.style.color='#C9A961';}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(248,246,241,0.15)';e.currentTarget.style.color='rgba(248,246,241,0.6)';}}>
+            ✕
+          </button>
+        </div>
+        {/* Body */}
+        <div className="overflow-y-auto px-8 py-7 space-y-7">
+          {data.sections.map((s, i) => (
+            <div key={i}>
+              <div className="num-label text-gold-400 mb-2">{s.heading}</div>
+              <p className="text-[14px] leading-[1.8] text-paper-100/70">{s.body}</p>
+            </div>
+          ))}
+          <p className="text-[12px] text-paper-100/35 pt-4 border-t" style={{borderColor:'rgba(248,246,241,0.08)'}}>
+            Last updated: January 2025 · ATLASWAY TRADING LIMITED · Hong Kong S.A.R.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ────────────────────────────────────────────────────────────────────────
+// COOKIE BANNER
+// ────────────────────────────────────────────────────────────────────────
+const CookieBanner = ({ onShowCookiePolicy }) => {
+  const [visible, setVisible] = React.useState(false);
+  React.useEffect(() => {
+    const accepted = localStorage.getItem('atlasway_cookies');
+    if (!accepted) setTimeout(() => setVisible(true), 1200);
+  }, []);
+  if (!visible) return null;
+  const accept = () => { localStorage.setItem('atlasway_cookies', '1'); setVisible(false); };
+  const decline = () => { localStorage.setItem('atlasway_cookies', '0'); setVisible(false); };
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-[150]"
+      style={{background:'#06101F', borderTop:'1px solid rgba(201,169,97,0.25)'}}>
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-12 py-5 flex flex-wrap items-center gap-6 justify-between">
+        <div className="flex items-start gap-4 flex-1 min-w-0">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="shrink-0 mt-0.5">
+            <circle cx="10" cy="10" r="9" stroke="#C9A961" strokeWidth="1.2"/>
+            <circle cx="10" cy="10" r="2" fill="#C9A961"/>
+            <line x1="10" y1="1" x2="10" y2="19" stroke="#C9A961" strokeWidth="0.6" opacity="0.4"/>
+            <line x1="1" y1="10" x2="19" y2="10" stroke="#C9A961" strokeWidth="0.6" opacity="0.4"/>
+          </svg>
+          <p className="text-[13px] leading-[1.6] text-paper-100/70">
+            We use strictly necessary cookies to ensure this website functions correctly. No advertising or tracking cookies are used.{' '}
+            <button onClick={onShowCookiePolicy} className="text-gold-400 underline underline-offset-2 hover:text-gold-300 transition">
+              Cookie Policy
+            </button>
+          </p>
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <button onClick={decline}
+            className="text-[12px] tracking-[0.1em] uppercase text-paper-100/50 hover:text-paper-100/80 transition px-4 py-2.5"
+            style={{border:'1px solid rgba(248,246,241,0.12)'}}>
+            Decline
+          </button>
+          <button onClick={accept}
+            className="text-[12px] tracking-[0.1em] uppercase transition px-5 py-2.5"
+            style={{background:'#C9A961', color:'#06101F', border:'1px solid #C9A961'}}
+            onMouseEnter={e=>{e.currentTarget.style.background='#A98843';e.currentTarget.style.borderColor='#A98843';}}
+            onMouseLeave={e=>{e.currentTarget.style.background='#C9A961';e.currentTarget.style.borderColor='#C9A961';}}>
+            Accept
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const App = () => {
   window.useReveal();
+  const [modal, setModal] = React.useState(null); // 'terms' | 'privacy' | 'cookies' | null
   return (
     <div className="min-h-screen">
       <window.Header/>
@@ -1271,7 +1407,9 @@ const App = () => {
         <window.Compliance/>
         <window.Contact/>
       </main>
-      <window.Footer/>
+      <window.Footer onOpenModal={setModal}/>
+      <CookieBanner onShowCookiePolicy={() => setModal('cookies')}/>
+      {modal && <LegalModal type={modal} onClose={() => setModal(null)}/>}
     </div>
   );
 };
